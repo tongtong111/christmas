@@ -1,0 +1,2063 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="theme-color" content="#0a1628">
+    <title>🎄 圣诞快乐 Merry Christmas 🎄</title>
+    <link href="https://fonts.googleapis.com/css2?family=Mountains+of+Christmas:wght@400;700&family=ZCOOL+KuaiLe&family=Dancing+Script:wght@400;700&family=Great+Vibes&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            min-height: 100vh;
+            min-height: -webkit-fill-available;
+            overflow: hidden;
+            background: linear-gradient(to bottom, 
+                #0a1628 0%, 
+                #1a365d 30%, 
+                #2d4a6f 60%,
+                #3d5a80 100%);
+            font-family: 'ZCOOL KuaiLe', 'Mountains of Christmas', cursive;
+            -webkit-tap-highlight-color: transparent;
+            -webkit-touch-callout: none;
+            -webkit-user-select: none;
+            user-select: none;
+            touch-action: manipulation;
+        }
+        
+        html {
+            height: -webkit-fill-available;
+        }
+        
+        /* iOS Safari 100vh 修复 */
+        :root {
+            --vh: 1vh;
+        }
+
+        /* ==================== 游戏界面样式 ==================== */
+        #gameScreen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1000;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        #gameCanvas {
+            border-radius: 20px;
+            box-shadow: 0 0 50px rgba(0, 0, 0, 0.5);
+        }
+
+        .game-ui {
+            position: absolute;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 30px;
+            z-index: 1001;
+        }
+
+        .game-stat {
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(10px);
+            padding: 10px 25px;
+            border-radius: 30px;
+            color: white;
+            font-size: 1.3em;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .game-title {
+            position: absolute;
+            top: 80px;
+            left: 50%;
+            transform: translateX(-50%);
+            color: #ffd700;
+            font-size: 2.5em;
+            text-shadow: 0 0 20px rgba(255, 215, 0, 0.8), 3px 3px 0 #c41e3a;
+            font-family: 'Mountains of Christmas', cursive;
+            z-index: 1001;
+        }
+
+        .game-instructions {
+            position: absolute;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            color: white;
+            font-size: 1.2em;
+            text-align: center;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+            z-index: 1001;
+        }
+
+        .start-btn {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            padding: 20px 50px;
+            font-size: 1.8em;
+            font-family: 'ZCOOL KuaiLe', cursive;
+            background: linear-gradient(145deg, #c41e3a, #8b0000);
+            color: white;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            transition: all 0.3s ease;
+            z-index: 1002;
+        }
+
+        .start-btn:hover {
+            transform: translate(-50%, -50%) scale(1.1);
+            box-shadow: 0 15px 40px rgba(196, 30, 58, 0.5);
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        /* ==================== 贺卡界面样式 ==================== */
+        #cardScreen {
+            display: none;
+            position: relative;
+            width: 100vw;
+            height: 100vh;
+        }
+
+        #cardScreen.show {
+            display: block;
+        }
+
+        #snowCanvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 5;
+        }
+
+        .scene {
+            position: relative;
+            width: 100vw;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        /* 星星 */
+        .stars {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+        }
+
+        .star {
+            position: absolute;
+            background: white;
+            border-radius: 50%;
+            animation: twinkle 2s infinite alternate;
+        }
+
+        @keyframes twinkle {
+            0% { opacity: 0.3; transform: scale(0.8); }
+            100% { opacity: 1; transform: scale(1.2); }
+        }
+
+        /* 月亮 */
+        .moon {
+            position: absolute;
+            top: 8%;
+            right: 15%;
+            width: 80px;
+            height: 80px;
+            background: radial-gradient(circle at 30% 30%, #fffacd, #ffd700);
+            border-radius: 50%;
+            box-shadow: 0 0 30px #ffd700, 0 0 60px rgba(255, 215, 0, 0.5);
+            animation: moonGlow 4s ease-in-out infinite;
+        }
+
+        @keyframes moonGlow {
+            0%, 100% { box-shadow: 0 0 30px #ffd700, 0 0 60px rgba(255, 215, 0, 0.5); }
+            50% { box-shadow: 0 0 50px #ffd700, 0 0 100px rgba(255, 215, 0, 0.7); }
+        }
+
+        /* 地面雪景 */
+        .ground {
+            position: absolute;
+            bottom: 0;
+            width: 100%;
+            height: 25%;
+            background: linear-gradient(to bottom, rgba(255, 255, 255, 0.9) 0%, #e8f4f8 50%, #d0e8f0 100%);
+            border-radius: 50% 50% 0 0 / 30px 30px 0 0;
+        }
+
+        /* 圣诞老人心形飞行轨迹 - 从中心开始 */
+        .santa-sleigh {
+            position: absolute;
+            top: 20%;
+            left: calc(50% - 130px);
+            z-index: 20;
+            opacity: 0;
+            animation: flyHeartShape 7s ease-in-out forwards;
+            animation-delay: 0.3s;
+        }
+
+        @keyframes flyHeartShape {
+            /* 从心形顶部中间凹陷处开始 - 淡入 */
+            0% { 
+                top: 20%; 
+                left: calc(50% - 130px); 
+                transform: rotate(0deg) scale(0.8);
+                opacity: 0;
+            }
+            3% {
+                opacity: 1;
+            }
+            /* 向左上弧顶移动 */
+            12% { 
+                top: 12%; 
+                left: 30%; 
+                transform: rotate(-30deg) scale(0.9);
+                opacity: 1;
+            }
+            /* 左弧顶最高点 */
+            22% { 
+                top: 8%; 
+                left: 22%; 
+                transform: rotate(-60deg) scale(0.95);
+            }
+            /* 左侧下降 */
+            32% { 
+                top: 25%; 
+                left: 25%; 
+                transform: rotate(-100deg) scale(0.95);
+            }
+            /* 左下方 */
+            42% { 
+                top: 42%; 
+                left: 35%; 
+                transform: rotate(-130deg) scale(1);
+            }
+            /* 心形底部尖端 */
+            52% { 
+                top: 55%; 
+                left: calc(50% - 130px); 
+                transform: rotate(-180deg) scale(1);
+            }
+            /* 右下方 */
+            62% { 
+                top: 42%; 
+                left: 60%; 
+                transform: rotate(-230deg) scale(1);
+            }
+            /* 右侧上升 */
+            72% { 
+                top: 25%; 
+                left: 68%; 
+                transform: rotate(-260deg) scale(0.95);
+            }
+            /* 右弧顶最高点 */
+            82% { 
+                top: 8%; 
+                left: 70%; 
+                transform: rotate(-300deg) scale(0.95);
+            }
+            /* 回到中间顶部 */
+            92% { 
+                top: 12%; 
+                left: 62%; 
+                transform: rotate(-330deg) scale(0.9);
+            }
+            /* 完成心形，淡出 */
+            100% { 
+                top: 20%; 
+                left: calc(50% - 130px); 
+                transform: rotate(-360deg) scale(0.8);
+                opacity: 0;
+            }
+        }
+
+        .sleigh-group {
+            display: flex;
+            align-items: center;
+            animation: bobbingDynamic 0.4s ease-in-out infinite;
+        }
+
+        @keyframes bobbingDynamic {
+            0%, 100% { transform: translateY(0) rotate(0deg); }
+            25% { transform: translateY(-8px) rotate(2deg); }
+            50% { transform: translateY(0) rotate(0deg); }
+            75% { transform: translateY(-5px) rotate(-2deg); }
+        }
+
+        .santa-full {
+            width: 120px;
+            height: 150px;
+            margin-left: 20px;
+            filter: drop-shadow(0 10px 20px rgba(0,0,0,0.3));
+        }
+
+        .reindeer-full {
+            width: 140px;
+            height: 100px;
+            filter: drop-shadow(0 10px 20px rgba(0,0,0,0.3));
+        }
+
+        .sleigh-trail {
+            position: absolute;
+            right: -120px;
+            top: 50%;
+            display: flex;
+            gap: 12px;
+        }
+
+        .sparkle {
+            font-size: 20px;
+            animation: sparkleAnim 0.5s ease-out infinite;
+            opacity: 0;
+        }
+
+        .sparkle:nth-child(1) { animation-delay: 0s; }
+        .sparkle:nth-child(2) { animation-delay: 0.1s; }
+        .sparkle:nth-child(3) { animation-delay: 0.2s; }
+        .sparkle:nth-child(4) { animation-delay: 0.3s; }
+        .sparkle:nth-child(5) { animation-delay: 0.4s; }
+        .sparkle:nth-child(6) { animation-delay: 0.5s; }
+
+        @keyframes sparkleAnim {
+            0% { opacity: 1; transform: scale(1.2) translateX(0); }
+            50% { opacity: 0.8; }
+            100% { opacity: 0; transform: scale(0.2) translateX(100px); }
+        }
+        
+        /* 心形轨迹光芒 */
+        .heart-glow {
+            position: absolute;
+            width: 30px;
+            height: 30px;
+            background: radial-gradient(circle, rgba(255,105,180,0.8) 0%, rgba(255,105,180,0) 70%);
+            border-radius: 50%;
+            animation: glowPulse 0.8s ease-in-out infinite;
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%, -50%);
+        }
+        
+        @keyframes glowPulse {
+            0%, 100% { transform: translate(-50%, -50%) scale(1); opacity: 0.6; }
+            50% { transform: translate(-50%, -50%) scale(1.5); opacity: 1; }
+        }
+
+        /* ==================== 可点击的爱心 ==================== */
+        .clickable-heart-container {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 50;
+            opacity: 0;
+            pointer-events: none;
+            cursor: pointer;
+        }
+
+        .clickable-heart-container.show {
+            opacity: 1;
+            pointer-events: auto;
+            animation: heartFloatIn 1.5s ease-out forwards;
+        }
+
+        @keyframes heartFloatIn {
+            0% { 
+                opacity: 0; 
+                transform: translate(-50%, -50%) scale(0) rotate(-20deg);
+            }
+            50% { 
+                opacity: 1; 
+                transform: translate(-50%, -50%) scale(1.2) rotate(10deg);
+            }
+            100% { 
+                opacity: 1; 
+                transform: translate(-50%, -50%) scale(1) rotate(0deg);
+            }
+        }
+
+        .clickable-heart {
+            font-size: 150px;
+            filter: drop-shadow(0 0 30px rgba(231, 76, 60, 0.8));
+            animation: heartPulse 1s ease-in-out infinite;
+            transition: transform 0.3s ease;
+        }
+
+        .clickable-heart:hover {
+            transform: scale(1.15);
+        }
+
+        @keyframes heartPulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.08); }
+        }
+
+        .click-hint {
+            position: absolute;
+            bottom: -60px;
+            left: 50%;
+            transform: translateX(-50%);
+            color: #ffd700;
+            font-size: 1.5em;
+            text-shadow: 0 0 10px rgba(255, 215, 0, 0.8);
+            animation: hintBlink 1.5s ease-in-out infinite;
+            white-space: nowrap;
+        }
+
+        @keyframes hintBlink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        /* ==================== 射箭动画 ==================== */
+        .arrow {
+            position: fixed;
+            left: -100px;
+            top: 50%;
+            transform: translateY(-50%);
+            z-index: 60;
+            opacity: 0;
+            font-size: 60px;
+            filter: drop-shadow(0 0 10px rgba(255, 215, 0, 0.8));
+        }
+
+        .arrow.shooting {
+            opacity: 1;
+            animation: arrowShoot 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+        }
+
+        @keyframes arrowShoot {
+            0% { 
+                left: -100px; 
+                transform: translateY(-50%) rotate(0deg) scale(1);
+            }
+            80% { 
+                left: calc(50% - 30px); 
+                transform: translateY(-50%) rotate(0deg) scale(1);
+            }
+            100% { 
+                left: calc(50% - 30px); 
+                transform: translateY(-50%) rotate(0deg) scale(0);
+                opacity: 0;
+            }
+        }
+
+        /* ==================== 爱心爆炸效果 ==================== */
+        .heart-explosion {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 55;
+            pointer-events: none;
+        }
+
+        .explosion-particle {
+            position: absolute;
+            font-size: 30px;
+            opacity: 0;
+        }
+
+        .explosion-particle.explode {
+            animation: particleExplode 1s ease-out forwards;
+        }
+
+        @keyframes particleExplode {
+            0% { 
+                opacity: 1; 
+                transform: translate(0, 0) scale(1);
+            }
+            100% { 
+                opacity: 0; 
+                transform: var(--explode-direction) scale(0.5);
+            }
+        }
+
+        /* ==================== 小王子星球场景 ==================== */
+        #littlePrinceScene {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(to bottom, #0a0a20 0%, #1a1a40 50%, #2a2a60 100%);
+            z-index: 500;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 1s ease;
+            overflow: hidden;
+        }
+
+        #littlePrinceScene.show {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        /* 流星粒子Canvas */
+        #meteorCanvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 2;
+        }
+
+        /* 星空背景 */
+        .prince-stars {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+        }
+
+        .prince-star {
+            position: absolute;
+            background: white;
+            border-radius: 50%;
+            animation: twinkleStar 3s ease-in-out infinite;
+        }
+
+        @keyframes twinkleStar {
+            0%, 100% { opacity: 0.3; transform: scale(0.8); }
+            50% { opacity: 1; transform: scale(1.2); }
+        }
+
+        /* B612星球 */
+        .planet-b612 {
+            position: absolute;
+            bottom: 5%;
+            left: 8%;
+            width: 320px;
+            height: 320px;
+            animation: planetFloat 6s ease-in-out infinite;
+        }
+
+        @keyframes planetFloat {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-15px); }
+        }
+
+        .planet-surface {
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle at 30% 30%, #8fbc8f, #556b2f, #2f4f2f);
+            border-radius: 50%;
+            box-shadow: 
+                inset -30px -30px 60px rgba(0,0,0,0.4),
+                0 0 60px rgba(143, 188, 143, 0.3),
+                0 0 120px rgba(143, 188, 143, 0.2);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .planet-crater {
+            position: absolute;
+            border-radius: 50%;
+            background: rgba(47, 79, 47, 0.6);
+        }
+
+        .planet-crater:nth-child(1) { width: 30px; height: 30px; top: 20%; left: 60%; }
+        .planet-crater:nth-child(2) { width: 20px; height: 20px; top: 50%; left: 30%; }
+        .planet-crater:nth-child(3) { width: 25px; height: 25px; top: 70%; left: 70%; }
+
+        /* 小王子 */
+        .little-prince {
+            position: absolute;
+            bottom: 55%;
+            left: 35%;
+            animation: princeIdle 3s ease-in-out infinite;
+        }
+
+        @keyframes princeIdle {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-5px); }
+        }
+
+        .prince-svg {
+            width: 80px;
+            height: 120px;
+            filter: drop-shadow(0 5px 15px rgba(0,0,0,0.3));
+        }
+
+        /* 玫瑰和玻璃罩 */
+        .rose-container {
+            position: absolute;
+            bottom: 55%;
+            right: 30%;
+            animation: roseGlow 2s ease-in-out infinite;
+        }
+
+        @keyframes roseGlow {
+            0%, 100% { filter: drop-shadow(0 0 10px rgba(255, 105, 180, 0.5)); }
+            50% { filter: drop-shadow(0 0 25px rgba(255, 105, 180, 0.8)); }
+        }
+
+        .glass-dome {
+            width: 60px;
+            height: 80px;
+            border: 2px solid rgba(255, 255, 255, 0.4);
+            border-radius: 50% 50% 5px 5px;
+            background: linear-gradient(135deg, rgba(255,255,255,0.1), transparent);
+            position: relative;
+        }
+
+        .rose-flower {
+            position: absolute;
+            bottom: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 35px;
+        }
+
+        /* 情书贺卡 - 小王子场景内 */
+        .love-letter {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 85%;
+            max-width: 550px;
+            background: linear-gradient(145deg, 
+                rgba(255, 253, 240, 0.95), 
+                rgba(255, 248, 230, 0.95));
+            border-radius: 20px;
+            padding: 40px 35px;
+            box-shadow: 
+                0 25px 80px rgba(0, 0, 0, 0.5),
+                0 0 80px rgba(255, 215, 0, 0.2),
+                inset 0 0 40px rgba(255, 223, 186, 0.3);
+            z-index: 510;
+            opacity: 0;
+            pointer-events: none;
+            border: 2px solid rgba(255, 215, 0, 0.4);
+        }
+
+        .love-letter.show {
+            opacity: 1;
+            pointer-events: auto;
+            animation: letterAppear 1.5s ease-out forwards;
+        }
+
+        @keyframes letterAppear {
+            0% { 
+                opacity: 0; 
+                transform: translate(-50%, -50%) scale(0) rotate(-10deg);
+            }
+            60% {
+                transform: translate(-50%, -50%) scale(1.05) rotate(2deg);
+            }
+            100% { 
+                opacity: 1; 
+                transform: translate(-50%, -50%) scale(1) rotate(0deg);
+            }
+        }
+
+        .love-letter h1 {
+            font-family: 'Great Vibes', cursive;
+            font-size: 3.2em;
+            color: #c41e3a;
+            text-align: center;
+            margin-bottom: 20px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+            animation: titleGlow 2s ease-in-out infinite;
+        }
+
+        @keyframes titleGlow {
+            0%, 100% { text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1), 0 0 20px rgba(196, 30, 58, 0.3); }
+            50% { text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1), 0 0 40px rgba(196, 30, 58, 0.5); }
+        }
+
+        .love-letter .letter-content {
+            font-family: Georgia, serif;
+            font-size: 1.15em;
+            color: #4a3728;
+            line-height: 1.8;
+            text-align: center;
+        }
+
+        .love-letter .letter-content p {
+            margin-bottom: 14px;
+        }
+
+        .love-letter .heart-deco {
+            text-align: center;
+            font-size: 1.5em;
+            margin-top: 15px;
+            animation: heartDeco 1.5s ease-in-out infinite;
+        }
+
+        @keyframes heartDeco {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.2); }
+        }
+
+        .love-letter .close-btn {
+            position: absolute;
+            top: 10px;
+            right: 15px;
+            font-size: 24px;
+            cursor: pointer;
+            color: #c41e3a;
+            transition: transform 0.3s ease;
+        }
+
+        .love-letter .close-btn:hover {
+            transform: scale(1.2) rotate(90deg);
+        }
+
+        /* 小王子场景的浮动星星装饰 */
+        .floating-stars {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+        }
+
+        .float-star {
+            position: absolute;
+            font-size: 20px;
+            animation: floatStar 4s ease-in-out infinite;
+            opacity: 0.8;
+        }
+
+        @keyframes floatStar {
+            0%, 100% { transform: translateY(0) rotate(0deg); }
+            50% { transform: translateY(-20px) rotate(180deg); }
+        }
+
+        /* 音乐控制按钮 */
+        .music-control {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            z-index: 200;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: linear-gradient(145deg, rgba(255,255,255,0.2), rgba(255,255,255,0.05));
+            backdrop-filter: blur(10px);
+            border: 2px solid rgba(255,255,255,0.3);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 28px;
+            transition: all 0.3s ease;
+        }
+
+        .music-control:hover { transform: scale(1.1); }
+        .music-control.playing { animation: pulse 1.5s ease-in-out infinite; }
+
+        @keyframes pulse {
+            0%, 100% { box-shadow: 0 0 0 0 rgba(255, 215, 0, 0.4); }
+            50% { box-shadow: 0 0 0 15px rgba(255, 215, 0, 0); }
+        }
+
+        .music-waves { position: absolute; display: flex; align-items: center; gap: 3px; opacity: 0; transition: opacity 0.3s; }
+        .music-control.playing .music-waves { opacity: 1; }
+        .music-control.playing .music-icon { display: none; }
+
+        .wave-bar { width: 4px; background: #ffd700; border-radius: 2px; animation: waveAnimation 0.8s ease-in-out infinite; }
+        .wave-bar:nth-child(1) { height: 10px; animation-delay: 0s; }
+        .wave-bar:nth-child(2) { height: 20px; animation-delay: 0.1s; }
+        .wave-bar:nth-child(3) { height: 15px; animation-delay: 0.2s; }
+        .wave-bar:nth-child(4) { height: 25px; animation-delay: 0.3s; }
+        .wave-bar:nth-child(5) { height: 12px; animation-delay: 0.4s; }
+
+        @keyframes waveAnimation {
+            0%, 100% { transform: scaleY(0.5); }
+            50% { transform: scaleY(1.2); }
+        }
+
+        /* 圣诞树 */
+        .christmas-tree {
+            position: absolute;
+            bottom: 20%;
+            left: 8%;
+            z-index: 5;
+        }
+
+        .tree-layer {
+            width: 0; height: 0;
+            border-left: 45px solid transparent;
+            border-right: 45px solid transparent;
+            border-bottom: 65px solid #1a5c1a;
+            margin: -18px auto;
+            position: relative;
+        }
+
+        .tree-layer:nth-child(2) { border-left-width: 55px; border-right-width: 55px; border-bottom-width: 75px; }
+        .tree-layer:nth-child(3) { border-left-width: 65px; border-right-width: 65px; border-bottom-width: 85px; }
+
+        .tree-trunk { width: 35px; height: 45px; background: #5d4037; margin: 0 auto; }
+        .tree-star { position: absolute; top: -28px; left: 50%; transform: translateX(-50%); font-size: 35px; animation: starPulse 1s ease-in-out infinite; }
+
+        @keyframes starPulse {
+            0%, 100% { transform: translateX(-50%) scale(1); }
+            50% { transform: translateX(-50%) scale(1.3); }
+        }
+
+        /* 小房子 */
+        .house {
+            position: absolute;
+            bottom: 18%;
+            right: 10%;
+            z-index: 4;
+        }
+
+        .house-body { width: 90px; height: 70px; background: linear-gradient(135deg, #8b4513 0%, #654321 100%); position: relative; }
+        .house-roof { width: 0; height: 0; border-left: 55px solid transparent; border-right: 55px solid transparent; border-bottom: 45px solid #c41e3a; position: absolute; top: -45px; left: -10px; }
+        .house-window { width: 22px; height: 22px; background: #ffd700; position: absolute; top: 18px; box-shadow: 0 0 15px rgba(255, 215, 0, 0.8); }
+        .house-window.left { left: 12px; }
+        .house-window.right { right: 12px; }
+        .house-door { width: 28px; height: 40px; background: #5d4037; position: absolute; bottom: 0; left: 50%; transform: translateX(-50%); border-radius: 15px 15px 0 0; }
+
+        /* ==================== 响应式优化 ==================== */
+        
+        /* 平板 */
+        @media (max-width: 1024px) {
+            .love-letter { 
+                width: 80%; 
+                padding: 35px 28px;
+            }
+            .love-letter h1 { font-size: 2.8em; }
+            .love-letter .letter-content { font-size: 1.05em; }
+            .planet-b612 { width: 280px; height: 280px; left: 5%; }
+        }
+
+        /* 手机横屏 & 小平板 */
+        @media (max-width: 768px) {
+            /* 游戏界面优化 */
+            .game-title { 
+                font-size: 1.5em; 
+                top: 60px;
+            }
+            .game-ui {
+                top: 10px;
+                gap: 15px;
+            }
+            .game-stat {
+                padding: 8px 15px;
+                font-size: 1em;
+            }
+            .start-btn {
+                padding: 15px 35px;
+                font-size: 1.4em;
+            }
+            .game-instructions {
+                font-size: 1em;
+                bottom: 15px;
+                padding: 0 20px;
+            }
+            
+            /* 音乐控制按钮 */
+            .music-control {
+                width: 50px;
+                height: 50px;
+                font-size: 22px;
+                top: 15px;
+                left: 15px;
+            }
+            
+            /* 圣诞场景优化 */
+            .santa-sleigh {
+                transform: scale(0.7);
+            }
+            .clickable-heart { font-size: 100px; }
+            .click-hint { 
+                font-size: 1.2em; 
+                bottom: -50px;
+            }
+            .christmas-tree { 
+                transform: scale(0.7); 
+                left: 3%; 
+                bottom: 18%;
+            }
+            .house { 
+                transform: scale(0.7); 
+                right: 3%; 
+                bottom: 16%;
+            }
+            .moon {
+                width: 50px;
+                height: 50px;
+                top: 5%;
+                right: 10%;
+            }
+            
+            /* 小王子场景 - 垂直布局 */
+            .planet-b612 { 
+                width: 200px; 
+                height: 200px; 
+                bottom: auto;
+                top: 3%;
+                left: 50%;
+                transform: translateX(-50%);
+            }
+            .little-prince { 
+                bottom: 55%; 
+                left: 30%; 
+            }
+            .prince-svg { width: 55px; height: 82px; }
+            .rose-container { 
+                bottom: 55%; 
+                right: 25%; 
+            }
+            .glass-dome { width: 40px; height: 55px; }
+            .rose-flower { font-size: 22px; }
+            
+            /* 情书贺卡 - 居中显示 */
+            .love-letter { 
+                width: 90%; 
+                max-width: none;
+                left: 50%;
+                top: 50%;
+                transform: translate(-50%, -50%);
+                padding: 25px 20px;
+                max-height: 70vh;
+                overflow-y: auto;
+            }
+            .love-letter.show {
+                animation: letterAppearMobile 1s ease-out forwards;
+            }
+            .love-letter h1 { 
+                font-size: 2.2em; 
+                margin-bottom: 15px; 
+            }
+            .love-letter .letter-content { 
+                font-size: 0.9em; 
+                line-height: 1.65; 
+            }
+            .love-letter .letter-content p { 
+                margin-bottom: 8px; 
+            }
+            .love-letter .heart-deco { 
+                font-size: 1.1em; 
+                margin-top: 10px; 
+            }
+            .love-letter .close-btn {
+                font-size: 22px;
+                top: 8px;
+                right: 12px;
+            }
+        }
+
+        /* 手机竖屏 */
+        @media (max-width: 480px) {
+            /* 游戏界面 */
+            .game-title { 
+                font-size: 1.2em; 
+                top: 50px;
+                white-space: nowrap;
+            }
+            .game-ui {
+                gap: 10px;
+            }
+            .game-stat {
+                padding: 6px 12px;
+                font-size: 0.9em;
+            }
+            .start-btn {
+                padding: 12px 30px;
+                font-size: 1.2em;
+            }
+            .game-instructions {
+                font-size: 0.85em;
+                line-height: 1.4;
+            }
+            
+            /* 音乐按钮 */
+            .music-control {
+                width: 44px;
+                height: 44px;
+                font-size: 20px;
+            }
+            
+            /* 圣诞场景 */
+            .santa-sleigh {
+                transform: scale(0.55);
+            }
+            .clickable-heart { font-size: 80px; }
+            .click-hint { 
+                font-size: 1em; 
+                bottom: -45px;
+            }
+            .christmas-tree { 
+                transform: scale(0.5); 
+                left: 2%;
+            }
+            .house { 
+                transform: scale(0.5); 
+                right: 2%;
+            }
+            
+            /* 小王子场景 */
+            .planet-b612 { 
+                width: 160px; 
+                height: 160px; 
+                top: 2%;
+            }
+            .little-prince { 
+                bottom: 52%; 
+                left: 28%; 
+            }
+            .prince-svg { width: 45px; height: 68px; }
+            .rose-container { 
+                bottom: 52%; 
+                right: 22%; 
+            }
+            .glass-dome { width: 32px; height: 45px; }
+            .rose-flower { font-size: 18px; }
+            
+            /* 情书贺卡 */
+            .love-letter { 
+                padding: 18px 15px;
+                bottom: 2%;
+                max-height: 60vh;
+            }
+            .love-letter h1 { 
+                font-size: 1.7em; 
+                margin-bottom: 10px;
+            }
+            .love-letter .letter-content { 
+                font-size: 0.85em; 
+                line-height: 1.6;
+            }
+            .love-letter .letter-content p { 
+                margin-bottom: 6px; 
+            }
+            .love-letter .heart-deco { 
+                font-size: 1em; 
+                margin-top: 8px;
+            }
+        }
+
+        /* 超小屏幕 */
+        @media (max-width: 360px) {
+            .game-title { font-size: 1em; }
+            .game-stat { font-size: 0.8em; padding: 5px 10px; }
+            .start-btn { font-size: 1em; padding: 10px 25px; }
+            .love-letter h1 { font-size: 1.5em; }
+            .love-letter .letter-content { font-size: 0.8em; }
+            .planet-b612 { width: 140px; height: 140px; }
+        }
+        
+        /* 手机横屏特殊处理 */
+        @media (max-height: 500px) and (orientation: landscape) {
+            .planet-b612 { 
+                width: 150px; 
+                height: 150px; 
+                top: 5%;
+                left: 5%;
+                transform: none;
+            }
+            .little-prince { bottom: 45%; left: 25%; }
+            .prince-svg { width: 40px; height: 60px; }
+            .rose-container { bottom: 45%; right: 60%; }
+            .glass-dome { width: 28px; height: 40px; }
+            .rose-flower { font-size: 16px; }
+            
+            .love-letter { 
+                width: 55%;
+                right: 3%;
+                left: auto;
+                top: 50%;
+                bottom: auto;
+                transform: translateY(-50%);
+                max-height: 85vh;
+                padding: 15px;
+            }
+            .love-letter h1 { font-size: 1.5em; margin-bottom: 8px; }
+            .love-letter .letter-content { font-size: 0.8em; line-height: 1.5; }
+            
+            .game-title { top: 5px; font-size: 1.2em; }
+            .game-ui { top: 5px; }
+            .game-instructions { bottom: 5px; font-size: 0.8em; }
+        }
+        
+        @keyframes letterAppearMobile {
+            0% { opacity: 0; transform: translate(-50%, -50%) scale(0) rotate(-5deg); }
+            60% { transform: translate(-50%, -50%) scale(1.03) rotate(1deg); }
+            100% { opacity: 1; transform: translate(-50%, -50%) scale(1) rotate(0deg); }
+        }
+        
+        /* 触控优化 */
+        @media (hover: none) and (pointer: coarse) {
+            .clickable-heart:active {
+                transform: scale(0.95);
+            }
+            .start-btn:active {
+                transform: translate(-50%, -50%) scale(0.95);
+            }
+            .music-control:active {
+                transform: scale(0.9);
+            }
+            .love-letter .close-btn:active {
+                transform: scale(1.1);
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- 背景音乐 -->
+    <audio id="bgMusic" loop preload="auto">
+        <source src="merry-christmas.mp3" type="audio/mpeg">
+    </audio>
+    
+    <!-- 情书场景音乐 -->
+    <audio id="loveMusic" loop preload="auto">
+        <source src="star.mp3" type="audio/mpeg">
+    </audio>
+
+    <!-- ==================== 游戏界面 ==================== -->
+    <div id="gameScreen">
+        <canvas id="gameCanvas"></canvas>
+        
+        <button class="music-control" id="gameMusicBtn" onclick="toggleMusic()">
+            <span class="music-icon">🎵</span>
+            <div class="music-waves">
+                <div class="wave-bar"></div>
+                <div class="wave-bar"></div>
+                <div class="wave-bar"></div>
+                <div class="wave-bar"></div>
+                <div class="wave-bar"></div>
+            </div>
+        </button>
+        
+        <div class="game-ui">
+            <div class="game-stat">🎁 礼物: <span id="score">0</span> / 10</div>
+            <div class="game-stat">❤️ 生命: <span id="lives">3</span></div>
+        </div>
+        <h1 class="game-title">🎄 帮圣诞老人接礼物 🎄</h1>
+        <button class="start-btn" id="startBtn">🎮 开始游戏</button>
+        <p class="game-instructions" id="gameInstructions">使用 ← → 方向键 或 触摸屏幕移动<br>接住 10 个礼物即可解锁圣诞贺卡！</p>
+    </div>
+
+    <!-- ==================== 贺卡界面 ==================== -->
+    <div id="cardScreen">
+        <canvas id="snowCanvas"></canvas>
+
+        <button class="music-control" id="musicBtn" onclick="toggleMusic()">
+            <span class="music-icon">🎵</span>
+            <div class="music-waves">
+                <div class="wave-bar"></div>
+                <div class="wave-bar"></div>
+                <div class="wave-bar"></div>
+                <div class="wave-bar"></div>
+                <div class="wave-bar"></div>
+            </div>
+        </button>
+
+        <div class="scene">
+            <div class="stars" id="stars"></div>
+            <div class="moon"></div>
+
+            <!-- 圣诞老人灵动飞行 -->
+            <div class="santa-sleigh" id="santaSleigh">
+                <div class="sleigh-group">
+                    <!-- 驯鹿 SVG -->
+                    <svg class="reindeer-full" viewBox="0 0 200 150">
+                        <ellipse cx="100" cy="90" rx="50" ry="35" fill="#8B4513"/>
+                        <ellipse cx="160" cy="60" rx="25" ry="20" fill="#A0522D"/>
+                        <circle cx="180" cy="65" r="8" fill="#ff0000"/>
+                        <circle cx="165" cy="55" r="4" fill="#000"/>
+                        <circle cx="166" cy="54" r="1.5" fill="#fff"/>
+                        <path d="M150 40 L145 20 L140 30 L135 15 M150 40 L155 20 L160 30 L165 15" stroke="#5D4037" stroke-width="4" fill="none" stroke-linecap="round"/>
+                        <path d="M145 45 L140 25 L135 35 L130 20 M145 45 L150 25 L155 35 L160 20" stroke="#5D4037" stroke-width="4" fill="none" stroke-linecap="round"/>
+                        <rect x="60" y="115" width="8" height="30" fill="#8B4513"/>
+                        <rect x="80" y="115" width="8" height="30" fill="#8B4513"/>
+                        <rect x="110" y="115" width="8" height="30" fill="#8B4513"/>
+                        <rect x="130" y="115" width="8" height="30" fill="#8B4513"/>
+                        <ellipse cx="64" cy="147" rx="6" ry="4" fill="#4a3728"/>
+                        <ellipse cx="84" cy="147" rx="6" ry="4" fill="#4a3728"/>
+                        <ellipse cx="114" cy="147" rx="6" ry="4" fill="#4a3728"/>
+                        <ellipse cx="134" cy="147" rx="6" ry="4" fill="#4a3728"/>
+                        <ellipse cx="45" cy="85" rx="8" ry="5" fill="#A0522D"/>
+                    </svg>
+
+                    <!-- 全身圣诞老人 SVG -->
+                    <svg class="santa-full" viewBox="0 0 120 180">
+                        <path d="M30 70 Q20 100 25 140 L95 140 Q100 100 90 70 Z" fill="#c41e3a"/>
+                        <rect x="22" y="135" width="76" height="12" rx="5" fill="#fff"/>
+                        <rect x="25" y="100" width="70" height="12" fill="#1a1a1a"/>
+                        <rect x="50" y="98" width="20" height="16" rx="3" fill="#ffd700"/>
+                        <circle cx="60" cy="45" r="28" fill="#ffdbac"/>
+                        <path d="M30 45 Q30 15 60 10 Q90 15 90 45 Z" fill="#c41e3a"/>
+                        <ellipse cx="60" cy="48" rx="35" ry="8" fill="#fff"/>
+                        <circle cx="95" cy="20" r="10" fill="#fff"/>
+                        <circle cx="50" cy="42" r="4" fill="#1a1a1a"/>
+                        <circle cx="70" cy="42" r="4" fill="#1a1a1a"/>
+                        <circle cx="51" cy="41" r="1.5" fill="#fff"/>
+                        <circle cx="71" cy="41" r="1.5" fill="#fff"/>
+                        <ellipse cx="60" cy="52" rx="6" ry="5" fill="#ffb6c1"/>
+                        <ellipse cx="42" cy="55" rx="8" ry="5" fill="#ffb6c1" opacity="0.5"/>
+                        <ellipse cx="78" cy="55" rx="8" ry="5" fill="#ffb6c1" opacity="0.5"/>
+                        <path d="M35 58 Q60 90 85 58 Q85 80 60 85 Q35 80 35 58" fill="#fff"/>
+                        <ellipse cx="15" cy="95" rx="12" ry="18" fill="#c41e3a"/>
+                        <ellipse cx="105" cy="95" rx="12" ry="18" fill="#c41e3a"/>
+                        <circle cx="12" cy="115" r="10" fill="#fff"/>
+                        <circle cx="108" cy="115" r="10" fill="#fff"/>
+                        <rect x="35" y="140" width="18" height="30" fill="#c41e3a"/>
+                        <rect x="67" y="140" width="18" height="30" fill="#c41e3a"/>
+                        <path d="M30 165 L30 175 Q30 180 40 180 L60 180 Q65 180 65 175 L65 165 Z" fill="#1a1a1a"/>
+                        <path d="M55 165 L55 175 Q55 180 65 180 L85 180 Q90 180 90 175 L90 165 Z" fill="#1a1a1a"/>
+                    </svg>
+                </div>
+                <div class="sleigh-trail">
+                    <span class="sparkle">💖</span>
+                    <span class="sparkle">✨</span>
+                    <span class="sparkle">💕</span>
+                    <span class="sparkle">⭐</span>
+                    <span class="sparkle">💗</span>
+                    <span class="sparkle">✨</span>
+                </div>
+                <div class="heart-glow"></div>
+            </div>
+
+            <!-- 可点击的爱心 -->
+            <div class="clickable-heart-container" id="clickableHeart">
+                <div class="clickable-heart" onclick="shootArrow()">❤️</div>
+                <div class="click-hint">💘 点击爱心，开启惊喜 💘</div>
+            </div>
+
+            <!-- 射箭动画 -->
+            <div class="arrow" id="arrow">🏹</div>
+
+            <!-- 爱心爆炸粒子 -->
+            <div class="heart-explosion" id="heartExplosion"></div>
+
+            <div class="ground"></div>
+
+            <div class="christmas-tree">
+                <div class="tree-star">⭐</div>
+                <div class="tree-layer"></div>
+                <div class="tree-layer"></div>
+                <div class="tree-layer"></div>
+                <div class="tree-trunk"></div>
+            </div>
+
+            <div class="house">
+                <div class="house-roof"></div>
+                <div class="house-body">
+                    <div class="house-window left"></div>
+                    <div class="house-window right"></div>
+                    <div class="house-door"></div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- ==================== 小王子星球场景 ==================== -->
+    <div id="littlePrinceScene">
+        <!-- 流星粒子Canvas -->
+        <canvas id="meteorCanvas"></canvas>
+        
+        <!-- 星空背景 -->
+        <div class="prince-stars" id="princeStars"></div>
+        
+        <!-- 浮动星星装饰 -->
+        <div class="floating-stars" id="floatingStars"></div>
+        
+        <!-- B612星球 -->
+        <div class="planet-b612">
+            <div class="planet-surface">
+                <div class="planet-crater"></div>
+                <div class="planet-crater"></div>
+                <div class="planet-crater"></div>
+            </div>
+            
+            <!-- 小王子 -->
+            <div class="little-prince">
+                <svg class="prince-svg" viewBox="0 0 80 120">
+                    <!-- 头发 -->
+                    <path d="M25 35 Q20 20 40 15 Q60 20 55 35" fill="#FFD700"/>
+                    <path d="M30 25 Q25 15 35 12 Q45 10 50 18" fill="#FFD700"/>
+                    <path d="M35 20 Q38 10 45 15" fill="#FFD700"/>
+                    <!-- 脸 -->
+                    <circle cx="40" cy="38" r="18" fill="#FFDAB9"/>
+                    <!-- 眼睛 -->
+                    <ellipse cx="34" cy="36" rx="3" ry="4" fill="#4A4A4A"/>
+                    <ellipse cx="46" cy="36" rx="3" ry="4" fill="#4A4A4A"/>
+                    <circle cx="35" cy="35" r="1" fill="#fff"/>
+                    <circle cx="47" cy="35" r="1" fill="#fff"/>
+                    <!-- 腮红 -->
+                    <ellipse cx="28" cy="42" rx="4" ry="2" fill="#FFB6C1" opacity="0.6"/>
+                    <ellipse cx="52" cy="42" rx="4" ry="2" fill="#FFB6C1" opacity="0.6"/>
+                    <!-- 微笑 -->
+                    <path d="M35 46 Q40 52 45 46" stroke="#4A4A4A" stroke-width="1.5" fill="none"/>
+                    <!-- 身体 - 绿色外套 -->
+                    <path d="M25 55 L22 95 L58 95 L55 55 Q40 50 25 55" fill="#2E8B57"/>
+                    <!-- 领子 -->
+                    <path d="M32 55 L40 65 L48 55" fill="#FFD700"/>
+                    <!-- 围巾 -->
+                    <rect x="30" y="52" width="20" height="8" rx="2" fill="#FF6347"/>
+                    <rect x="45" y="55" width="8" height="25" rx="2" fill="#FF6347"/>
+                    <!-- 裤子 -->
+                    <rect x="28" y="90" width="12" height="20" fill="#F5F5DC"/>
+                    <rect x="42" y="90" width="12" height="20" fill="#F5F5DC"/>
+                    <!-- 靴子 -->
+                    <ellipse cx="34" cy="112" rx="8" ry="5" fill="#8B4513"/>
+                    <ellipse cx="48" cy="112" rx="8" ry="5" fill="#8B4513"/>
+                </svg>
+            </div>
+            
+            <!-- 玫瑰和玻璃罩 -->
+            <div class="rose-container">
+                <div class="glass-dome">
+                    <div class="rose-flower">🌹</div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 情书贺卡 -->
+        <div class="love-letter" id="loveLetter">
+            <span class="close-btn" onclick="closeLetter()">✕</span>
+            <h1>Love</h1>
+            <div class="letter-content">
+                <p>I love you, not only for what you are,<br>but for what I am when I am with you.</p>
+                <p>I love you, for the part of me that you bring out;</p>
+                <p>I love you, for putting your hand into my heaping heart<br>and passing over all the foolish, weak things<br>that you can't help dimly seeing there,</p>
+                <p>and for drawing out into the light<br>all the beautiful belongings<br>that no one else had looked quite far enough to find.</p>
+            </div>
+            <div class="heart-deco">💕 Forever Yours 💕</div>
+        </div>
+    </div>
+
+    <script>
+        // ==================== 设备检测与性能优化 ====================
+        const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) 
+            || window.innerWidth <= 768;
+        const isLowPerf = isMobile || navigator.hardwareConcurrency <= 4;
+        
+        // 根据设备调整粒子数量
+        const PARTICLE_COUNT = {
+            stars: isLowPerf ? 40 : 80,
+            snow: isLowPerf ? 80 : 150,
+            princeStars: isLowPerf ? 60 : 120,
+            floatingStars: isLowPerf ? 8 : 15,
+            meteors: isLowPerf ? 3 : 5,
+            maxMeteors: isLowPerf ? 5 : 8
+        };
+        
+        // ==================== 游戏逻辑 ====================
+        const gameCanvas = document.getElementById('gameCanvas');
+        const gameCtx = gameCanvas.getContext('2d');
+        const gameScreen = document.getElementById('gameScreen');
+        const cardScreen = document.getElementById('cardScreen');
+        const startBtn = document.getElementById('startBtn');
+        const scoreEl = document.getElementById('score');
+        const livesEl = document.getElementById('lives');
+
+        // 手机上使用更小的画布尺寸以提高性能
+        const maxCanvasWidth = isMobile ? Math.min(400, window.innerWidth - 20) : Math.min(800, window.innerWidth - 40);
+        const maxCanvasHeight = isMobile ? Math.min(500, window.innerHeight - 150) : Math.min(600, window.innerHeight - 200);
+        gameCanvas.width = maxCanvasWidth;
+        gameCanvas.height = maxCanvasHeight;
+
+        let gameRunning = false;
+        let score = 0;
+        let lives = 3;
+        let gifts = [];
+        let santaX = gameCanvas.width / 2;
+        const santaWidth = 80;
+        const santaHeight = 100;
+        const targetScore = 10;
+
+        function drawGameSanta(x, y) {
+            const w = santaWidth;
+            const h = santaHeight;
+            
+            gameCtx.fillStyle = '#c41e3a';
+            gameCtx.beginPath();
+            gameCtx.moveTo(x - w/3, y - h/2 + 30);
+            gameCtx.quadraticCurveTo(x - w/2.5, y, x - w/3, y + h/3);
+            gameCtx.lineTo(x + w/3, y + h/3);
+            gameCtx.quadraticCurveTo(x + w/2.5, y, x + w/3, y - h/2 + 30);
+            gameCtx.fill();
+            
+            gameCtx.fillStyle = '#1a1a1a';
+            gameCtx.fillRect(x - w/3, y - 5, w * 0.66, 10);
+            gameCtx.fillStyle = '#ffd700';
+            gameCtx.fillRect(x - 8, y - 7, 16, 14);
+            
+            gameCtx.fillStyle = '#fff';
+            gameCtx.fillRect(x - w/3, y + h/3 - 8, w * 0.66, 10);
+            
+            gameCtx.fillStyle = '#ffdbac';
+            gameCtx.beginPath();
+            gameCtx.arc(x, y - h/2 + 15, 22, 0, Math.PI * 2);
+            gameCtx.fill();
+            
+            gameCtx.fillStyle = '#c41e3a';
+            gameCtx.beginPath();
+            gameCtx.moveTo(x - 25, y - h/2 + 18);
+            gameCtx.quadraticCurveTo(x, y - h/2 - 25, x + 25, y - h/2 + 18);
+            gameCtx.fill();
+            
+            gameCtx.fillStyle = '#fff';
+            gameCtx.beginPath();
+            gameCtx.ellipse(x, y - h/2 + 18, 28, 6, 0, 0, Math.PI * 2);
+            gameCtx.fill();
+            
+            gameCtx.beginPath();
+            gameCtx.arc(x + 20, y - h/2 - 15, 8, 0, Math.PI * 2);
+            gameCtx.fill();
+            
+            gameCtx.fillStyle = '#1a1a1a';
+            gameCtx.beginPath();
+            gameCtx.arc(x - 8, y - h/2 + 12, 3, 0, Math.PI * 2);
+            gameCtx.arc(x + 8, y - h/2 + 12, 3, 0, Math.PI * 2);
+            gameCtx.fill();
+            
+            gameCtx.fillStyle = '#fff';
+            gameCtx.beginPath();
+            gameCtx.moveTo(x - 18, y - h/2 + 22);
+            gameCtx.quadraticCurveTo(x, y - h/2 + 45, x + 18, y - h/2 + 22);
+            gameCtx.quadraticCurveTo(x + 15, y - h/2 + 35, x, y - h/2 + 40);
+            gameCtx.quadraticCurveTo(x - 15, y - h/2 + 35, x - 18, y - h/2 + 22);
+            gameCtx.fill();
+            
+            gameCtx.fillStyle = '#fff';
+            gameCtx.beginPath();
+            gameCtx.arc(x - w/2 + 5, y + 5, 8, 0, Math.PI * 2);
+            gameCtx.arc(x + w/2 - 5, y + 5, 8, 0, Math.PI * 2);
+            gameCtx.fill();
+            
+            gameCtx.fillStyle = '#1a1a1a';
+            gameCtx.fillRect(x - 20, y + h/3, 15, 15);
+            gameCtx.fillRect(x + 5, y + h/3, 15, 15);
+        }
+
+        class Gift {
+            constructor() {
+                this.x = Math.random() * (gameCanvas.width - 40) + 20;
+                this.y = -40;
+                this.size = 35 + Math.random() * 15;
+                this.speed = 2 + Math.random() * 2;
+                this.color = ['#c41e3a', '#228b22', '#ffd700', '#4169e1', '#ff69b4'][Math.floor(Math.random() * 5)];
+                this.ribbon = ['#ffd700', '#fff', '#ff69b4', '#00ff00'][Math.floor(Math.random() * 4)];
+            }
+
+            update() { this.y += this.speed; }
+
+            draw() {
+                gameCtx.fillStyle = this.color;
+                gameCtx.fillRect(this.x - this.size/2, this.y - this.size/2, this.size, this.size);
+                
+                gameCtx.fillStyle = this.ribbon;
+                gameCtx.fillRect(this.x - 3, this.y - this.size/2, 6, this.size);
+                gameCtx.fillRect(this.x - this.size/2, this.y - 3, this.size, 6);
+                
+                gameCtx.beginPath();
+                gameCtx.arc(this.x - 8, this.y - this.size/2 - 5, 8, 0, Math.PI * 2);
+                gameCtx.arc(this.x + 8, this.y - this.size/2 - 5, 8, 0, Math.PI * 2);
+                gameCtx.fill();
+            }
+        }
+
+        function drawGameBackground() {
+            const gradient = gameCtx.createLinearGradient(0, 0, 0, gameCanvas.height);
+            gradient.addColorStop(0, '#0a1628');
+            gradient.addColorStop(0.5, '#1a365d');
+            gradient.addColorStop(1, '#2d4a6f');
+            gameCtx.fillStyle = gradient;
+            gameCtx.fillRect(0, 0, gameCanvas.width, gameCanvas.height);
+            
+            gameCtx.fillStyle = 'rgba(255, 255, 255, 0.9)';
+            gameCtx.beginPath();
+            gameCtx.ellipse(gameCanvas.width/2, gameCanvas.height + 30, gameCanvas.width/1.5, 80, 0, Math.PI, 0);
+            gameCtx.fill();
+            
+            gameCtx.fillStyle = '#fff';
+            for (let i = 0; i < 30; i++) {
+                const sx = (i * 37) % gameCanvas.width;
+                const sy = (i * 23) % (gameCanvas.height * 0.6);
+                const size = 1 + (i % 3);
+                gameCtx.beginPath();
+                gameCtx.arc(sx, sy, size, 0, Math.PI * 2);
+                gameCtx.fill();
+            }
+        }
+
+        function gameLoop() {
+            if (!gameRunning) return;
+            
+            drawGameBackground();
+            
+            if (Math.random() < 0.02) gifts.push(new Gift());
+            
+            for (let i = gifts.length - 1; i >= 0; i--) {
+                gifts[i].update();
+                gifts[i].draw();
+                
+                if (Math.abs(gifts[i].x - santaX) < santaWidth/2 + gifts[i].size/2 &&
+                    gifts[i].y > gameCanvas.height - santaHeight - 30 &&
+                    gifts[i].y < gameCanvas.height - 20) {
+                    gifts.splice(i, 1);
+                    score++;
+                    scoreEl.textContent = score;
+                    
+                    if (score >= targetScore) {
+                        gameWin();
+                        return;
+                    }
+                    continue;
+                }
+                
+                if (gifts[i].y > gameCanvas.height + 20) {
+                    gifts.splice(i, 1);
+                    lives--;
+                    livesEl.textContent = lives;
+                    
+                    if (lives <= 0) {
+                        gameOver();
+                        return;
+                    }
+                }
+            }
+            
+            drawGameSanta(santaX, gameCanvas.height - santaHeight/2 - 20);
+            requestAnimationFrame(gameLoop);
+        }
+
+        function gameWin() {
+            gameRunning = false;
+            gameScreen.classList.add('hidden');
+            cardScreen.classList.add('show');
+            initCard();
+        }
+
+        function gameOver() {
+            gameRunning = false;
+            score = 0;
+            lives = 3;
+            gifts = [];
+            scoreEl.textContent = score;
+            livesEl.textContent = lives;
+            startBtn.textContent = '🔄 再来一次';
+            startBtn.classList.remove('hidden');
+        }
+
+        startBtn.addEventListener('click', () => {
+            startBtn.classList.add('hidden');
+            score = 0;
+            lives = 3;
+            gifts = [];
+            scoreEl.textContent = score;
+            livesEl.textContent = lives;
+            gameRunning = true;
+            bgMusic.play().catch(e => console.log('需要用户交互播放音乐'));
+            gameLoop();
+        });
+
+        // 键盘控制
+        document.addEventListener('keydown', (e) => {
+            if (!gameRunning) return;
+            if (e.key === 'ArrowLeft') santaX = Math.max(santaWidth/2, santaX - 25);
+            if (e.key === 'ArrowRight') santaX = Math.min(gameCanvas.width - santaWidth/2, santaX + 25);
+        });
+
+        // 触摸控制 - 优化手机体验
+        let touchStartX = 0;
+        let isTouching = false;
+        
+        gameCanvas.addEventListener('touchstart', (e) => {
+            if (!gameRunning) return;
+            e.preventDefault();
+            isTouching = true;
+            const rect = gameCanvas.getBoundingClientRect();
+            touchStartX = e.touches[0].clientX - rect.left;
+            // 直接移动到触摸位置
+            santaX = touchStartX;
+            santaX = Math.max(santaWidth/2, Math.min(gameCanvas.width - santaWidth/2, santaX));
+        }, { passive: false });
+
+        gameCanvas.addEventListener('touchmove', (e) => {
+            if (!gameRunning || !isTouching) return;
+            e.preventDefault();
+            const rect = gameCanvas.getBoundingClientRect();
+            santaX = e.touches[0].clientX - rect.left;
+            santaX = Math.max(santaWidth/2, Math.min(gameCanvas.width - santaWidth/2, santaX));
+        }, { passive: false });
+        
+        gameCanvas.addEventListener('touchend', () => {
+            isTouching = false;
+        });
+
+        // 鼠标控制
+        gameCanvas.addEventListener('mousemove', (e) => {
+            if (!gameRunning) return;
+            const rect = gameCanvas.getBoundingClientRect();
+            santaX = e.clientX - rect.left;
+            santaX = Math.max(santaWidth/2, Math.min(gameCanvas.width - santaWidth/2, santaX));
+        });
+        
+        // 点击画布左右两侧移动（备用控制方式）
+        gameCanvas.addEventListener('click', (e) => {
+            if (!gameRunning) return;
+            const rect = gameCanvas.getBoundingClientRect();
+            const clickX = e.clientX - rect.left;
+            if (clickX < gameCanvas.width / 2) {
+                santaX = Math.max(santaWidth/2, santaX - 40);
+            } else {
+                santaX = Math.min(gameCanvas.width - santaWidth/2, santaX + 40);
+            }
+        });
+
+        drawGameBackground();
+        drawGameSanta(santaX, gameCanvas.height - santaHeight/2 - 20);
+        
+        // 手机上显示不同的操作提示
+        if (isMobile) {
+            const instructions = document.getElementById('gameInstructions');
+            if (instructions) {
+                instructions.innerHTML = '👆 触摸或点击屏幕控制圣诞老人<br>接住 10 个礼物即可解锁圣诞贺卡！';
+            }
+        }
+
+        // ==================== 贺卡逻辑 ====================
+        function initCard() {
+            createStars();
+            initSnowCanvas();
+            
+            // 圣诞老人心形轨迹飞完后显示爱心
+            setTimeout(() => {
+                document.getElementById('clickableHeart').classList.add('show');
+            }, 7500); // 心形飞行动画7秒后显示爱心
+        }
+
+        function createStars() {
+            const starsContainer = document.getElementById('stars');
+            if (!starsContainer) return;
+            for (let i = 0; i < PARTICLE_COUNT.stars; i++) {
+                const star = document.createElement('div');
+                star.className = 'star';
+                star.style.left = Math.random() * 100 + '%';
+                star.style.top = Math.random() * 60 + '%';
+                star.style.width = Math.random() * 3 + 1 + 'px';
+                star.style.height = star.style.width;
+                star.style.animationDelay = Math.random() * 2 + 's';
+                starsContainer.appendChild(star);
+            }
+        }
+
+        function initSnowCanvas() {
+            const canvas = document.getElementById('snowCanvas');
+            if (!canvas) return;
+            const ctx = canvas.getContext('2d');
+            
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+            
+            const snowflakes = [];
+            for (let i = 0; i < PARTICLE_COUNT.snow; i++) {
+                snowflakes.push({
+                    x: Math.random() * canvas.width,
+                    y: Math.random() * canvas.height,
+                    size: Math.random() * 4 + 1,
+                    speed: Math.random() * 2 + 0.5,
+                    wind: Math.random() * 0.5 - 0.25,
+                    opacity: Math.random() * 0.6 + 0.4
+                });
+            }
+            
+            function animate() {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                ctx.fillStyle = '#fff';
+                
+                snowflakes.forEach(s => {
+                    s.y += s.speed;
+                    s.x += s.wind;
+                    if (s.y > canvas.height) { s.y = -10; s.x = Math.random() * canvas.width; }
+                    
+                    ctx.globalAlpha = s.opacity;
+                    ctx.beginPath();
+                    ctx.arc(s.x, s.y, s.size, 0, Math.PI * 2);
+                    ctx.fill();
+                });
+                
+                requestAnimationFrame(animate);
+            }
+            animate();
+        }
+
+        // ==================== 射箭效果 ====================
+        function shootArrow() {
+            const arrow = document.getElementById('arrow');
+            const clickableHeart = document.getElementById('clickableHeart');
+            
+            // 射箭动画
+            arrow.classList.add('shooting');
+            
+            // 箭射中后
+            setTimeout(() => {
+                clickableHeart.style.display = 'none';
+                createExplosion();
+                
+                // 显示小王子场景
+                setTimeout(() => {
+                    showLittlePrinceScene();
+                }, 800);
+            }, 700);
+        }
+
+        function createExplosion() {
+            const container = document.getElementById('heartExplosion');
+            const particles = ['❤️', '💕', '💗', '💖', '💘', '✨', '⭐', '🌟'];
+            
+            for (let i = 0; i < 20; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'explosion-particle';
+                particle.textContent = particles[Math.floor(Math.random() * particles.length)];
+                
+                const angle = (i / 20) * Math.PI * 2;
+                const distance = 150 + Math.random() * 100;
+                const x = Math.cos(angle) * distance;
+                const y = Math.sin(angle) * distance;
+                
+                particle.style.setProperty('--explode-direction', `translate(${x}px, ${y}px)`);
+                container.appendChild(particle);
+                
+                setTimeout(() => particle.classList.add('explode'), 50);
+                
+                setTimeout(() => particle.remove(), 1500);
+            }
+        }
+
+        // ==================== 小王子星球场景 ====================
+        function showLittlePrinceScene() {
+            const scene = document.getElementById('littlePrinceScene');
+            scene.classList.add('show');
+            
+            // 切换到情书音乐
+            switchToLoveMusic();
+            
+            // 创建星空
+            createPrinceStars();
+            createFloatingStars();
+            
+            // 启动流星粒子效果
+            initMeteorCanvas();
+            
+            // 延迟显示情书
+            setTimeout(() => {
+                document.getElementById('loveLetter').classList.add('show');
+            }, 1500);
+        }
+        
+        function switchToLoveMusic() {
+            const loveMusic = document.getElementById('loveMusic');
+            // 淡出圣诞音乐
+            bgMusic.pause();
+            // 播放情书音乐
+            loveMusic.play().catch(e => console.log('播放被阻止'));
+        }
+        
+        // ==================== 流星粒子效果 ====================
+        let meteorAnimationId = null;
+        
+        function initMeteorCanvas() {
+            const canvas = document.getElementById('meteorCanvas');
+            if (!canvas) return;
+            const ctx = canvas.getContext('2d');
+            
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+            
+            const meteors = [];
+            const particles = [];
+            
+            // 流星类
+            class Meteor {
+                constructor() {
+                    this.reset();
+                }
+                
+                reset() {
+                    this.x = Math.random() * canvas.width * 1.5;
+                    this.y = -50;
+                    this.length = 80 + Math.random() * 100;
+                    this.speed = 8 + Math.random() * 8;
+                    this.angle = Math.PI / 4 + (Math.random() - 0.5) * 0.3;
+                    this.opacity = 0.6 + Math.random() * 0.4;
+                    this.thickness = 1.5 + Math.random() * 2;
+                    this.color = this.getRandomColor();
+                    this.trail = [];
+                    this.maxTrail = 20;
+                    this.active = true;
+                }
+                
+                getRandomColor() {
+                    const colors = [
+                        { r: 255, g: 255, b: 255 },  // 白色
+                        { r: 255, g: 223, b: 186 },  // 暖黄
+                        { r: 200, g: 220, b: 255 },  // 淡蓝
+                        { r: 255, g: 200, b: 220 },  // 粉色
+                        { r: 255, g: 215, b: 0 }     // 金色
+                    ];
+                    return colors[Math.floor(Math.random() * colors.length)];
+                }
+                
+                update() {
+                    // 保存轨迹（手机上减少轨迹长度）
+                    this.trail.unshift({ x: this.x, y: this.y });
+                    const maxTrailLength = isLowPerf ? 12 : this.maxTrail;
+                    if (this.trail.length > maxTrailLength) {
+                        this.trail.pop();
+                    }
+                    
+                    // 移动
+                    this.x -= Math.cos(this.angle) * this.speed;
+                    this.y += Math.sin(this.angle) * this.speed;
+                    
+                    // 产生尾迹粒子（手机上减少粒子）
+                    const particleRate = isLowPerf ? 0.25 : 0.5;
+                    if (Math.random() < particleRate) {
+                        particles.push(new Particle(this.x, this.y, this.color));
+                    }
+                    
+                    // 超出屏幕重置
+                    if (this.y > canvas.height + 100 || this.x < -100) {
+                        this.reset();
+                    }
+                }
+                
+                draw() {
+                    // 绘制流星尾迹
+                    for (let i = 0; i < this.trail.length - 1; i++) {
+                        const t = this.trail[i];
+                        const alpha = (1 - i / this.trail.length) * this.opacity * 0.5;
+                        const width = this.thickness * (1 - i / this.trail.length);
+                        
+                        ctx.beginPath();
+                        ctx.strokeStyle = `rgba(${this.color.r}, ${this.color.g}, ${this.color.b}, ${alpha})`;
+                        ctx.lineWidth = width;
+                        ctx.lineCap = 'round';
+                        ctx.moveTo(t.x, t.y);
+                        if (this.trail[i + 1]) {
+                            ctx.lineTo(this.trail[i + 1].x, this.trail[i + 1].y);
+                        }
+                        ctx.stroke();
+                    }
+                    
+                    // 绘制流星头部（发光效果）
+                    const gradient = ctx.createRadialGradient(this.x, this.y, 0, this.x, this.y, 8);
+                    gradient.addColorStop(0, `rgba(255, 255, 255, ${this.opacity})`);
+                    gradient.addColorStop(0.3, `rgba(${this.color.r}, ${this.color.g}, ${this.color.b}, ${this.opacity * 0.8})`);
+                    gradient.addColorStop(1, 'rgba(255, 255, 255, 0)');
+                    
+                    ctx.beginPath();
+                    ctx.fillStyle = gradient;
+                    ctx.arc(this.x, this.y, 8, 0, Math.PI * 2);
+                    ctx.fill();
+                }
+            }
+            
+            // 尾迹粒子类
+            class Particle {
+                constructor(x, y, color) {
+                    this.x = x + (Math.random() - 0.5) * 10;
+                    this.y = y + (Math.random() - 0.5) * 10;
+                    this.size = 1 + Math.random() * 2;
+                    this.speedX = (Math.random() - 0.5) * 2;
+                    this.speedY = (Math.random() - 0.5) * 2;
+                    this.opacity = 0.8;
+                    this.decay = 0.015 + Math.random() * 0.02;
+                    this.color = color;
+                }
+                
+                update() {
+                    this.x += this.speedX;
+                    this.y += this.speedY;
+                    this.opacity -= this.decay;
+                    this.size *= 0.98;
+                }
+                
+                draw() {
+                    if (this.opacity <= 0) return;
+                    ctx.beginPath();
+                    ctx.fillStyle = `rgba(${this.color.r}, ${this.color.g}, ${this.color.b}, ${this.opacity})`;
+                    ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                    ctx.fill();
+                }
+            }
+            
+            // 初始化流星
+            for (let i = 0; i < PARTICLE_COUNT.meteors; i++) {
+                const meteor = new Meteor();
+                meteor.y = Math.random() * canvas.height * 0.5;
+                meteor.x = Math.random() * canvas.width;
+                meteors.push(meteor);
+            }
+            
+            // 动画循环
+            function animate() {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                
+                // 随机添加新流星（手机上降低生成频率）
+                const spawnRate = isLowPerf ? 0.01 : 0.02;
+                if (Math.random() < spawnRate && meteors.length < PARTICLE_COUNT.maxMeteors) {
+                    meteors.push(new Meteor());
+                }
+                
+                // 更新和绘制流星
+                meteors.forEach(meteor => {
+                    meteor.update();
+                    meteor.draw();
+                });
+                
+                // 更新和绘制粒子
+                for (let i = particles.length - 1; i >= 0; i--) {
+                    particles[i].update();
+                    particles[i].draw();
+                    if (particles[i].opacity <= 0) {
+                        particles.splice(i, 1);
+                    }
+                }
+                
+                meteorAnimationId = requestAnimationFrame(animate);
+            }
+            
+            animate();
+            
+            // 窗口大小变化时调整
+            window.addEventListener('resize', () => {
+                canvas.width = window.innerWidth;
+                canvas.height = window.innerHeight;
+            });
+        }
+
+        function createPrinceStars() {
+            const container = document.getElementById('princeStars');
+            if (!container || container.children.length > 0) return;
+            
+            for (let i = 0; i < PARTICLE_COUNT.princeStars; i++) {
+                const star = document.createElement('div');
+                star.className = 'prince-star';
+                star.style.left = Math.random() * 100 + '%';
+                star.style.top = Math.random() * 100 + '%';
+                star.style.width = Math.random() * 3 + 1 + 'px';
+                star.style.height = star.style.width;
+                star.style.animationDelay = Math.random() * 3 + 's';
+                star.style.animationDuration = (2 + Math.random() * 2) + 's';
+                container.appendChild(star);
+            }
+        }
+
+        function createFloatingStars() {
+            const container = document.getElementById('floatingStars');
+            if (!container || container.children.length > 0) return;
+            
+            const starEmojis = ['⭐', '✨', '🌟', '💫'];
+            for (let i = 0; i < PARTICLE_COUNT.floatingStars; i++) {
+                const star = document.createElement('div');
+                star.className = 'float-star';
+                star.textContent = starEmojis[Math.floor(Math.random() * starEmojis.length)];
+                star.style.left = Math.random() * 100 + '%';
+                star.style.top = Math.random() * 60 + '%';
+                star.style.animationDelay = Math.random() * 4 + 's';
+                star.style.fontSize = (15 + Math.random() * 15) + 'px';
+                container.appendChild(star);
+            }
+        }
+
+        function closeLetter() {
+            document.getElementById('loveLetter').classList.remove('show');
+            // 点击关闭后可以再次点击星球查看
+        }
+
+        // ==================== 音乐控制 ====================
+        const bgMusic = document.getElementById('bgMusic');
+        const musicBtn = document.getElementById('musicBtn');
+        const gameMusicBtn = document.getElementById('gameMusicBtn');
+        let isPlaying = false;
+
+        function toggleMusic() {
+            if (isPlaying) {
+                bgMusic.pause();
+            } else {
+                bgMusic.play().catch(e => console.log('播放被阻止'));
+            }
+        }
+
+        function updateMusicButtons(playing) {
+            isPlaying = playing;
+            [musicBtn, gameMusicBtn].forEach(btn => {
+                if (btn) {
+                    btn.classList.toggle('playing', playing);
+                }
+            });
+        }
+
+        bgMusic.addEventListener('play', () => updateMusicButtons(true));
+        bgMusic.addEventListener('pause', () => updateMusicButtons(false));
+        
+        // ==================== 手机适配优化 ====================
+        // 防止页面滚动和弹性效果
+        document.body.addEventListener('touchmove', (e) => {
+            if (e.target.closest('.love-letter')) return; // 允许情书内容滚动
+            e.preventDefault();
+        }, { passive: false });
+        
+        // 处理屏幕旋转
+        window.addEventListener('orientationchange', () => {
+            setTimeout(() => {
+                // 重新调整画布大小
+                const snowCanvas = document.getElementById('snowCanvas');
+                const meteorCanvas = document.getElementById('meteorCanvas');
+                if (snowCanvas) {
+                    snowCanvas.width = window.innerWidth;
+                    snowCanvas.height = window.innerHeight;
+                }
+                if (meteorCanvas) {
+                    meteorCanvas.width = window.innerWidth;
+                    meteorCanvas.height = window.innerHeight;
+                }
+                // 重新调整游戏画布
+                if (gameCanvas && !gameRunning) {
+                    const newWidth = isMobile ? Math.min(400, window.innerWidth - 20) : Math.min(800, window.innerWidth - 40);
+                    const newHeight = isMobile ? Math.min(500, window.innerHeight - 150) : Math.min(600, window.innerHeight - 200);
+                    gameCanvas.width = newWidth;
+                    gameCanvas.height = newHeight;
+                    santaX = newWidth / 2;
+                    drawGameBackground();
+                    drawGameSanta(santaX, newHeight - santaHeight/2 - 20);
+                }
+            }, 100);
+        });
+        
+        // iOS Safari 100vh 问题修复
+        function setVH() {
+            let vh = window.innerHeight * 0.01;
+            document.documentElement.style.setProperty('--vh', `${vh}px`);
+        }
+        setVH();
+        window.addEventListener('resize', setVH);
+    </script>
+</body>
+</html>
